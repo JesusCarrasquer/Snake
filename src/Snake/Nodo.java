@@ -60,8 +60,8 @@ public class Nodo {
             return false;
         }
         Nodo a = (Nodo) e;
-        if (this.getCoordX() > a.coordX && this.getCoordX() < a.getCoordX()+32) {
-            if (this.getCoordY() > a.getCoordY() && this.getCoordY() < this.getCoordY()+32) {
+        if (coordX > a.getCoordX() && coordX < (a.getCoordX()+32)) {
+            if (coordY > a.getCoordY() && coordY < (coordY+32)) {
                 return true;
             }
         }
