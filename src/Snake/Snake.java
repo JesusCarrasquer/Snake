@@ -28,9 +28,17 @@ public class Snake {
     }
     
     public void updateNodos(){
-        for (int i = 1; i < nodos.size(); i++) {
-            if (nodos.get(i).getDireccion() != nodos.get(i-1).getDireccion()) {
-                nodos.get(i).setDireccion(nodos.get(i-1).getDireccion());
+        int nodosSize = nodos.size();
+        
+        for (int i = 1; i < nodosSize; i++) {
+            Nodo nAnterior = nodos.get(i-1);
+            Nodo nActual = nodos.get(i);
+
+            dir direccionActual = nActual.getDireccion();
+            dir direccionAnterior = nAnterior.getDireccion();
+
+            if (direccionActual != direccionAnterior) {
+                nActual.setDireccion(direccionAnterior);
             }
         }
     }
