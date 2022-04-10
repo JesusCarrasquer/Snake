@@ -7,13 +7,15 @@ package Snake;
 
 import java.util.ArrayList;
 
+import Snake.Nodo.dir;
+
 /**
  *
  * @author Yisus
  */
 public class Snake {
     
-    ArrayList<Nodo> nodos;
+    private ArrayList<Nodo> nodos;
     private boolean alive;
     
     public Snake(){
@@ -26,8 +28,26 @@ public class Snake {
     public boolean getAlive(){
         return this.alive;
     }
+
+    public void updateAlive(){
+        
+        for(int i = 0; i<nodos.size(); i++){
+            for(int k = i+1; k<nodos.size();k++){
+                if(nodos.get(i).equals(nodos.get(i))){
+                    alive = false;
+                    break;
+                }
+            }
+        }
+    }
     
-    public void updateNodos(){
+    public void updateMovimientoNodos(){
+        for(Nodo e : nodos){
+            e.updatePos();
+        }
+    }
+
+    public void updateSeguimientoNodos(){
         int nodosSize = nodos.size();
         
         for (int i = 1; i < nodosSize; i++) {
@@ -45,5 +65,9 @@ public class Snake {
     
     public void cambiaDir(Nodo.dir direccion){
         nodos.get(0).setDireccion(direccion);
+    }
+
+    public ArrayList<Nodo> getListaNodos(){
+        return nodos;
     }
 }
