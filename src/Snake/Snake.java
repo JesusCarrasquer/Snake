@@ -33,11 +33,32 @@ public class Snake {
         
         for(int i = 0; i<nodos.size(); i++){
             for(int k = i+1; k<nodos.size();k++){
-                if(nodos.get(i).equals(nodos.get(i))){
+                if(nodos.get(i).equals(nodos.get(k))){
                     alive = false;
                     break;
                 }
             }
+        }
+    }
+
+    public void creaNodo(){
+        Nodo lastNodo = nodos.get(nodos.size()-1);
+        dir direccionLast = lastNodo.getDireccion();
+        switch(direccionLast){
+            case EAST:
+                nodos.add(new Nodo(lastNodo.getCoordX()-32, lastNodo.getCoordY(), direccionLast));
+                break;
+            case NORTH:
+                nodos.add(new Nodo(lastNodo.getCoordX(), lastNodo.getCoordY()+32, direccionLast));
+                break;
+            case SOUTH:
+                nodos.add(new Nodo(lastNodo.getCoordX(), lastNodo.getCoordY()-32, direccionLast));
+                break;
+            case WEST:
+                nodos.add(new Nodo(lastNodo.getCoordX()+32, lastNodo.getCoordY(), direccionLast));
+                break;
+            default:
+                break;
         }
     }
     
@@ -50,7 +71,7 @@ public class Snake {
     public void updateSeguimientoNodos(){
         int nodosSize = nodos.size();
         
-        for (int i = 1; i < nodosSize; i++) {
+        for (int i = nodosSize-1; i>0; i--) {
             Nodo nAnterior = nodos.get(i-1);
             Nodo nActual = nodos.get(i);
 

@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 import java.awt.Graphics2D;
 
 import Listeners.MovementListener;
+import Snake.Comida;
 import Snake.Nodo;
 import Snake.Snake;
 import Snake.Nodo.dir;
@@ -47,9 +48,14 @@ public class Juego extends Canvas implements Runnable {
     BufferedImage headDown;
     BufferedImage bodyVert;
     BufferedImage bodyHorz;
+    BufferedImage food;
 
     //VARIABLE JUGADOR
     Snake s;
+
+    //VARIABLE COMIDA
+
+    Comida c;
     
     /**
      * Metodo para comenzar nuestro hilo de ejecucion en el juego
@@ -93,7 +99,7 @@ public class Juego extends Canvas implements Runnable {
         long timer = System.currentTimeMillis();
         //Variables relacionadas con el update del juego
         long ultimoTick = System.nanoTime();
-        final double frameRate = 60.0;
+        final double frameRate = 10.0;
         double ns = 1000000000 / frameRate;
         double catchup = 0;
         //Comprobacion cada vez que el metodo ejecute
@@ -130,7 +136,11 @@ public class Juego extends Canvas implements Runnable {
         }
         s.updateMovimientoNodos();
         s.updateSeguimientoNodos();
-        
+        Nodo headNode = s.getListaNodos().get(0);
+        if(c.compareTo(headNode)==0){
+            s.creaNodo();
+            c = new Comida((int) (Math.random()*(ANCHO-50 * ESCALADO))+100,((int) Math.random()*(ALTO-50 * ESCALADO))+100);
+        }
     }
 
     private void render() {
@@ -167,13 +177,16 @@ public class Juego extends Canvas implements Runnable {
         }
 
         for(int i = 1; i<nodos.size(); i++){
-            if(nodos.get(i).getDireccion()==dir.NORTH ||  nodos.get(i).getDireccion()==dir.NORTH){
+            if(nodos.get(i).getDireccion()==dir.NORTH ||  nodos.get(i).getDireccion()==dir.SOUTH){
                 drawer.drawImage(bodyVert,nodos.get(i).getCoordX(),nodos.get(i).getCoordY(),null);
             }
             else{
                 drawer.drawImage(bodyHorz,nodos.get(i).getCoordX(),nodos.get(i).getCoordY(),null);
             }
         }
+
+        //dibujando comida
+        drawer.drawImage(food, c.getCoordX(), c.getCoordY(),null);
         
         //TERMINA EL RENDER
         g.dispose();
@@ -191,11 +204,13 @@ public class Juego extends Canvas implements Runnable {
             headDown = ImageIO.read(new File("src/Graficos/Assets/NyanHeadDown.png"));
             headLeft = ImageIO.read(new File("src/Graficos/Assets/NyanHeadLeft.png"));
             headRight = ImageIO.read(new File("src/Graficos/Assets/NyanHeadRight.png"));
-            bodyVert = ImageIO.read(new File("src/Graficos/Assets/NyanRainbow.png"));
-            bodyHorz = ImageIO.read(new File("src/Graficos/Assets/NyanRainbow.png"));
+            food = ImageIO.read(new File("src/Graficos/Assets/Food.png"));
+            bodyVert = ImageIO.read(new File("src/Graficos/Assets/NyanRainbowVert.png"));
+            bodyHorz = ImageIO.read(new File("src/Graficos/Assets/NyanRainbowHorz.png"));
         } catch (IOException ex) {
             Logger.getLogger(Juego.class.getName()).log(Level.SEVERE, null, ex);
         }
+        c = new Comida(ANCHO * ESCALADO/2, ALTO * ESCALADO/2);
         s = new Snake();
         addKeyListener(new MovementListener(s));
     }

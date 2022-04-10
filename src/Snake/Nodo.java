@@ -34,27 +34,28 @@ public class Nodo {
     public void updatePos(){
         int ancho = Juego.ANCHO * Juego.ESCALADO;
         int alto = Juego.ALTO * Juego.ESCALADO;
+        int speed = 32;
         switch(direccion){
             case EAST:
-                coordX+=5;
+                coordX+=speed;
                 if(coordX>ancho){
                     coordX -= ancho;
                 }
                 break;
             case NORTH:
-                coordY-=5;
+                coordY-=speed;
                 if(coordY<0){
                     coordY += alto;
                 }
                 break;
             case SOUTH:
-                coordY+=5;
+                coordY+=speed;
                 if(coordY>alto){
                     coordY -= alto;
                 }
                 break;
             case WEST:
-                coordX-=5;
+                coordX-=speed;
                 if(coordX<0){
                     coordX += ancho;
                 }
@@ -97,8 +98,9 @@ public class Nodo {
             return false;
         }
         Nodo a = (Nodo) e;
-        if (coordX > a.getCoordX() && coordX < (a.getCoordX()+32)) {
-            if (coordY > a.getCoordY() && coordY < (coordY+32)) {
+        //Magic hitbox bullshit shinanigans
+        if ((coordX > a.getCoordX() && coordX < a.getCoordX()+32) || (coordX+32 > a.getCoordX() && coordX <a.getCoordX())) {
+            if ((coordY < a.getCoordY() && coordY+32 > a.getCoordY()) || (coordY>a.getCoordY() && coordY < a.getCoordY()+32)) {
                 return true;
             }
         }
