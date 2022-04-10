@@ -5,6 +5,8 @@
  */
 package Snake;
 
+import Ventanas.Juego;
+
 /**
  *
  * @author Yisus
@@ -27,6 +29,41 @@ public class Nodo {
         this.direccion = direccion;
         this.coordX = coordX;
         this.coordY = coordY;
+    }
+
+    public void updatePos(){
+        int ancho = Juego.ANCHO * Juego.ESCALADO;
+        int alto = Juego.ALTO * Juego.ESCALADO;
+        switch(direccion){
+            case EAST:
+                coordX+=5;
+                if(coordX>ancho){
+                    coordX -= ancho;
+                }
+                break;
+            case NORTH:
+                coordY-=5;
+                if(coordY<0){
+                    coordY += alto;
+                }
+                break;
+            case SOUTH:
+                coordY+=5;
+                if(coordY>alto){
+                    coordY -= alto;
+                }
+                break;
+            case WEST:
+                coordX-=5;
+                if(coordX<0){
+                    coordX += ancho;
+                }
+                break;
+            default:
+                break;
+        
+        }
+        
     }
 
     public dir getDireccion() {

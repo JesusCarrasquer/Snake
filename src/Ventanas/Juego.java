@@ -12,9 +12,17 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+
+import java.awt.Graphics2D;
+
+import Listeners.MovementListener;
+import Snake.Nodo;
+import Snake.Snake;
+import Snake.Nodo.dir;
 
 /**
  *
@@ -23,9 +31,9 @@ import javax.imageio.ImageIO;
 public class Juego extends Canvas implements Runnable {
 
     //VARIABES DE TAMAÑO DE PANTALLA Y ESCALADO
-    private final int ANCHO = 400;
-    private final int ALTO = (ANCHO / 12) * 9;
-    private final int ESCALADO = 2;
+    public final static int ANCHO = 400;
+    public final static int ALTO = (ANCHO / 12) * 9;
+    public final static int ESCALADO = 2;
 
     //THREAD VARIABLES
     private boolean arrancado = false;
@@ -33,6 +41,15 @@ public class Juego extends Canvas implements Runnable {
     
     //BUFFER FONDO
     BufferedImage fondo; // se inicializa en el constructor
+    BufferedImage headUp;
+    BufferedImage headRight;
+    BufferedImage headLeft;
+    BufferedImage headDown;
+    BufferedImage bodyVert;
+    BufferedImage bodyHorz;
+
+    //VARIABLE JUGADOR
+    Snake s;
     
     /**
      * Metodo para comenzar nuestro hilo de ejecucion en el juego
@@ -108,7 +125,12 @@ public class Juego extends Canvas implements Runnable {
     }
 
     private void tick() {
-
+        if(!s.getAlive()){
+            s = new Snake();
+        }
+        s.updateMovimientoNodos();
+        s.updateSeguimientoNodos();
+        
     }
 
     private void render() {
@@ -122,7 +144,36 @@ public class Juego extends Canvas implements Runnable {
         Graphics g = bs.getDrawGraphics();
         //COMIENZA EL RENDER
         
+        //dibujando el fondo
         g.drawImage(fondo,0,0, getWidth(), getHeight(), this);
+
+        //dibujando la serpiente
+        ArrayList<Nodo> nodos = s.getListaNodos();
+        Graphics2D drawer = (Graphics2D) g;
+        
+        switch(nodos.get(0).getDireccion()){
+            case EAST:
+                drawer.drawImage(headRight,nodos.get(0).getCoordX(),nodos.get(0).getCoordY(),null);
+                break;
+            case NORTH:
+                drawer.drawImage(headUp,nodos.get(0).getCoordX(),nodos.get(0).getCoordY(),null);
+                break;
+            case SOUTH:
+                drawer.drawImage(headDown,nodos.get(0).getCoordX(),nodos.get(0).getCoordY(),null);
+                break;
+            case WEST:
+                drawer.drawImage(headLeft,nodos.get(0).getCoordX(),nodos.get(0).getCoordY(),null);
+                break;
+        }
+
+        for(int i = 1; i<nodos.size(); i++){
+            if(nodos.get(i).getDireccion()==dir.NORTH ||  nodos.get(i).getDireccion()==dir.NORTH){
+                drawer.drawImage(bodyVert,nodos.get(i).getCoordX(),nodos.get(i).getCoordY(),null);
+            }
+            else{
+                drawer.drawImage(bodyHorz,nodos.get(i).getCoordX(),nodos.get(i).getCoordY(),null);
+            }
+        }
         
         //TERMINA EL RENDER
         g.dispose();
@@ -136,9 +187,17 @@ public class Juego extends Canvas implements Runnable {
         this.setMinimumSize(new Dimension(ANCHO * ESCALADO, ALTO * ESCALADO));
         try{
             fondo = ImageIO.read(new File("src/Graficos/Assets/Background.png"));
+            headUp = ImageIO.read(new File("src/Graficos/Assets/NyanHeadUp.png"));
+            headDown = ImageIO.read(new File("src/Graficos/Assets/NyanHeadDown.png"));
+            headLeft = ImageIO.read(new File("src/Graficos/Assets/NyanHeadLeft.png"));
+            headRight = ImageIO.read(new File("src/Graficos/Assets/NyanHeadRight.png"));
+            bodyVert = ImageIO.read(new File("src/Graficos/Assets/NyanRainbow.png"));
+            bodyHorz = ImageIO.read(new File("src/Graficos/Assets/NyanRainbow.png"));
         } catch (IOException ex) {
             Logger.getLogger(Juego.class.getName()).log(Level.SEVERE, null, ex);
         }
+        s = new Snake();
+        addKeyListener(new MovementListener(s));
     }
 
 }
