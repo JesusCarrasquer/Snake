@@ -16,8 +16,8 @@ public class Comida implements Comparable<Nodo> {
             return 0;
         }
         //Magic hitbox bullshit shinanigans
-        if ((coordX > o.getCoordX() && coordX < o.getCoordX()+32) || (coordX+32 > o.getCoordX() && coordX <o.getCoordX())) {
-            if ((coordY < o.getCoordY() && coordY+32 > o.getCoordY()) || (coordY>o.getCoordY() && coordY < o.getCoordY()+32)) {
+        if ((coordX >= o.getCoordX() && coordX <= o.getCoordX()+32) || (coordX+32 >= o.getCoordX() && coordX <=o.getCoordX())) {
+            if ((coordY <= o.getCoordY() && coordY+32 >= o.getCoordY()) || (coordY>=o.getCoordY() && coordY <= o.getCoordY()+32)) {
                 return 0;
             }
         }

@@ -17,6 +17,7 @@ public class Snake {
     
     private ArrayList<Nodo> nodos;
     private boolean alive;
+    public static int snakeSpeed = 32;
     
     public Snake(){
         Nodo nodo1 = new Nodo(0,0,Nodo.dir.SOUTH);
@@ -34,7 +35,7 @@ public class Snake {
         for(int i = 0; i<nodos.size(); i++){
             for(int k = i+1; k<nodos.size();k++){
                 if(nodos.get(i).equals(nodos.get(k))){
-                    alive = false;
+                    this.alive = false;
                     break;
                 }
             }

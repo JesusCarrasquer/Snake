@@ -34,7 +34,7 @@ public class Nodo {
     public void updatePos(){
         int ancho = Juego.ANCHO * Juego.ESCALADO;
         int alto = Juego.ALTO * Juego.ESCALADO;
-        int speed = 32;
+        int speed = Snake.snakeSpeed;
         switch(direccion){
             case EAST:
                 coordX+=speed;
@@ -99,8 +99,8 @@ public class Nodo {
         }
         Nodo a = (Nodo) e;
         //Magic hitbox bullshit shinanigans
-        if ((coordX > a.getCoordX() && coordX < a.getCoordX()+32) || (coordX+32 > a.getCoordX() && coordX <a.getCoordX())) {
-            if ((coordY < a.getCoordY() && coordY+32 > a.getCoordY()) || (coordY>a.getCoordY() && coordY < a.getCoordY()+32)) {
+        if ((coordX >= a.getCoordX() && coordX <= a.getCoordX()+30) || (coordX+30 >= a.getCoordX() && coordX <=a.getCoordX())) {
+            if ((coordY <= a.getCoordY() && coordY+30 >= a.getCoordY()) || (coordY>=a.getCoordY() && coordY <= a.getCoordY()+30)) {
                 return true;
             }
         }
