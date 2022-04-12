@@ -99,7 +99,7 @@ public class Juego extends Canvas implements Runnable {
         long timer = System.currentTimeMillis();
         //Variables relacionadas con el update del juego
         long ultimoTick = System.nanoTime();
-        final double frameRate = 10.0;
+        final double frameRate = 15.0;
         double ns = 1000000000 / frameRate;
         double catchup = 0;
         //Comprobacion cada vez que el metodo ejecute
@@ -133,13 +133,17 @@ public class Juego extends Canvas implements Runnable {
     private void tick() {
         if(!s.getAlive()){
             s = new Snake();
+            addKeyListener(new MovementListener(s));
         }
         s.updateMovimientoNodos();
         s.updateSeguimientoNodos();
+        s.updateAlive();
+ 
         Nodo headNode = s.getListaNodos().get(0);
         if(c.compareTo(headNode)==0){
             s.creaNodo();
-            c = new Comida((int) (Math.random()*(ANCHO-50 * ESCALADO))+100,((int) Math.random()*(ALTO-50 * ESCALADO))+100);
+            
+            c = new Comida((int) (Math.random()*(ANCHO-50 * ESCALADO))+100,((int) (Math.random()*(ALTO-50 * ESCALADO)))+100);
         }
     }
 
