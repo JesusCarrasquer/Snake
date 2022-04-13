@@ -6,7 +6,9 @@
 package Ventanas;
 
 import java.awt.Canvas;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
@@ -19,6 +21,7 @@ import javax.imageio.ImageIO;
 
 import java.awt.Graphics2D;
 
+import Listeners.MenuListener;
 import Listeners.MovementListener;
 import Snake.Comida;
 import Snake.Nodo;
@@ -35,6 +38,8 @@ public class Juego extends Canvas implements Runnable {
     public final static int ANCHO = 400;
     public final static int ALTO = (ANCHO / 12) * 9;
     public final static int ESCALADO = 2;
+    public static final int ANCHOFINAL = ANCHO*ESCALADO;
+    public static final int ALTOFINAL = ALTO*ESCALADO;
 
     //THREAD VARIABLES
     private boolean arrancado = false;
@@ -54,8 +59,40 @@ public class Juego extends Canvas implements Runnable {
     Snake s;
 
     //VARIABLE COMIDA
-
     Comida c;
+
+    //SCORE
+    private int scoreActual = 0;
+    private int bestScore = 0;
+
+    //ESTADO DEL JUEGO
+    public enum STATE{
+        MENU,JUEGO
+    }
+
+    private STATE gameState;
+
+    public STATE getState(){
+        return this.gameState;
+    }
+
+    public void setState(STATE e){
+        gameState = e;
+    }
+
+    public void cambiaModo(){
+        if(gameState == STATE.JUEGO){
+            gameState = STATE.MENU;
+            addMouseListener(new MenuListener(this));
+        }
+        else{
+            
+            s = new Snake();
+            c = new Comida((int) (Math.random()*(ANCHOFINAL-100))+100,((int) (Math.random()*(ALTOFINAL-100)))+100);
+            addKeyListener(new MovementListener(s));
+            gameState = STATE.JUEGO;
+        }
+    }
     
     /**
      * Metodo para comenzar nuestro hilo de ejecucion en el juego
@@ -131,22 +168,25 @@ public class Juego extends Canvas implements Runnable {
     }
 
     private void tick() {
-        if(!s.getAlive()){
-            s = new Snake();
-            addKeyListener(new MovementListener(s));
+        if(gameState != STATE.JUEGO){
+            return;
         }
         s.updateMovimientoNodos();
         s.updateSeguimientoNodos();
         s.updateAlive();
- 
+        if(!s.getAlive()){
+            if(scoreActual > bestScore){
+                bestScore = scoreActual;
+            }
+            cambiaModo();
+        }
         Nodo headNode = s.getListaNodos().get(0);
         if(c.compareTo(headNode)==0){
             s.creaNodo();
-            
-            c = new Comida((int) (Math.random()*(ANCHO-50 * ESCALADO))+100,((int) (Math.random()*(ALTO-50 * ESCALADO)))+100);
+            scoreActual++;
+            c = new Comida((int) (Math.random()*(ANCHOFINAL-100))+50,((int) (Math.random()*(ALTOFINAL-100)))+50);
         }
     }
-
     private void render() {
         //Esta variable devuelve el bufferStrategy del canvas actual, devolvera null si no hemos hecho nada y el actual usado a partir de ahi.
         BufferStrategy bs = this.getBufferStrategy();
@@ -160,11 +200,49 @@ public class Juego extends Canvas implements Runnable {
         
         //dibujando el fondo
         g.drawImage(fondo,0,0, getWidth(), getHeight(), this);
-
-        //dibujando la serpiente
-        ArrayList<Nodo> nodos = s.getListaNodos();
         Graphics2D drawer = (Graphics2D) g;
-        
+        //dibujando el juego
+        if(gameState == STATE.JUEGO){
+            dibujaSerpiente(drawer);
+            //dibujando comida
+            drawer.drawImage(food, c.getCoordX(), c.getCoordY(),null);
+            drawer.setFont(new Font("Serif",Font.BOLD,40));
+            drawer.setColor(Color.white);
+            drawer.drawString("Score: " + scoreActual, (ANCHOFINAL-150)/2, ALTOFINAL/8);
+        }
+        else{
+            dibujaMenu(drawer);
+        }
+        //TERMINA EL RENDER
+        g.dispose();
+        bs.show();
+    }
+    /**
+     * Renderizado del menu
+     * @param drawer
+     */
+    public void dibujaMenu(Graphics2D drawer){
+        drawer.setColor(Color.orange);
+        int anchomid = (ANCHOFINAL-200)/2;
+        drawer.setFont(new Font("Serif",Font.BOLD,40));
+        drawer.drawString("NYANSNAKE", anchomid-27, (ALTOFINAL/8)+50);
+        drawer.setColor(Color.green);
+        drawer.setFont(new Font("Serif",Font.BOLD,24));
+        drawer.drawRect(anchomid, ALTOFINAL*3/8, 200, ALTOFINAL/8);
+        drawer.drawString("JUGAR", anchomid+55, (ALTOFINAL*3/8)+46);
+        drawer.setColor(new Color(221,160,221));
+        drawer.drawRect(anchomid, ALTOFINAL*5/8, 200, ALTOFINAL/8);
+        drawer.drawString("SALIR", anchomid+60, (ALTOFINAL*5/8)+46);
+        drawer.setColor(Color.white);
+        drawer.drawString("Best Score: " + bestScore, anchomid+30, ALTOFINAL*7/8);
+    }
+
+    /**
+     * Metodo que dibuja la serpiente entera, en caso de que se esté jugando
+     * @param drawer
+     */
+    public void dibujaSerpiente(Graphics2D drawer){
+        ArrayList<Nodo> nodos = s.getListaNodos();
         switch(nodos.get(0).getDireccion()){
             case EAST:
                 drawer.drawImage(headRight,nodos.get(0).getCoordX(),nodos.get(0).getCoordY(),null);
@@ -188,16 +266,11 @@ public class Juego extends Canvas implements Runnable {
                 drawer.drawImage(bodyHorz,nodos.get(i).getCoordX(),nodos.get(i).getCoordY(),null);
             }
         }
-
-        //dibujando comida
-        drawer.drawImage(food, c.getCoordX(), c.getCoordY(),null);
-        
-        //TERMINA EL RENDER
-        g.dispose();
-        bs.show();
     }
-    
 
+    /**
+     * Constructor del canvas, donde toda la lógica del juego funciona
+     */
     public Juego() {
         this.setPreferredSize(new Dimension(ANCHO * ESCALADO, ALTO * ESCALADO));
         this.setMaximumSize(new Dimension(ANCHO * ESCALADO, ALTO * ESCALADO));
@@ -214,9 +287,8 @@ public class Juego extends Canvas implements Runnable {
         } catch (IOException ex) {
             Logger.getLogger(Juego.class.getName()).log(Level.SEVERE, null, ex);
         }
-        c = new Comida(ANCHO * ESCALADO/2, ALTO * ESCALADO/2);
-        s = new Snake();
-        addKeyListener(new MovementListener(s));
+        gameState = STATE.MENU;
+        addMouseListener(new MenuListener(this));
     }
 
 }
