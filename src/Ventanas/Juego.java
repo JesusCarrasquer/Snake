@@ -55,6 +55,10 @@ public class Juego extends Canvas implements Runnable {
     BufferedImage bodyHorz;
     BufferedImage food;
 
+    //LISTENERS
+    MovementListener listenerJuego;
+    MenuListener listenerMenu;
+
     //VARIABLE JUGADOR
     Snake s;
 
@@ -83,13 +87,16 @@ public class Juego extends Canvas implements Runnable {
     public void cambiaModo(){
         if(gameState == STATE.JUEGO){
             gameState = STATE.MENU;
-            addMouseListener(new MenuListener(this));
+            this.addMouseListener(listenerMenu);;
+            this.removeKeyListener(listenerJuego);
         }
         else{
             
             s = new Snake();
             c = new Comida((int) (Math.random()*(ANCHOFINAL-100))+100,((int) (Math.random()*(ALTOFINAL-100)))+100);
-            addKeyListener(new MovementListener(s));
+            listenerJuego = new MovementListener(s);
+            this.addKeyListener(listenerJuego);
+            this.removeMouseListener(listenerMenu);
             gameState = STATE.JUEGO;
         }
     }
@@ -178,6 +185,7 @@ public class Juego extends Canvas implements Runnable {
             if(scoreActual > bestScore){
                 bestScore = scoreActual;
             }
+            scoreActual = 0;
             cambiaModo();
         }
         Nodo headNode = s.getListaNodos().get(0);
@@ -288,7 +296,8 @@ public class Juego extends Canvas implements Runnable {
             Logger.getLogger(Juego.class.getName()).log(Level.SEVERE, null, ex);
         }
         gameState = STATE.MENU;
-        addMouseListener(new MenuListener(this));
+        listenerMenu = new MenuListener(this);
+        addMouseListener(listenerMenu);
     }
 
 }
