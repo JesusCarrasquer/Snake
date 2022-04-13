@@ -5,8 +5,6 @@
  */
 package Main;
 
-import javax.swing.JFrame;
-
 import Ventanas.Ventana;
 
 /**
