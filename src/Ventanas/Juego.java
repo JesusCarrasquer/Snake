@@ -13,11 +13,19 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import java.awt.Graphics2D;
 
@@ -298,6 +306,20 @@ public class Juego extends Canvas implements Runnable {
         gameState = STATE.MENU;
         listenerMenu = new MenuListener(this);
         addMouseListener(listenerMenu);
+        //PLAYER SONIDO
+        try {
+            AudioInputStream au = AudioSystem.getAudioInputStream(new File("src/Graficos/MusicaEspacio.wav").getAbsoluteFile());
+            Clip clip = AudioSystem.getClip();
+            clip.open(au);
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
+            FloatControl volumen = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            float gain = 0.05f;
+            float deciBelios = (float) (Math.log(gain)/Math.log(10.0)*20);
+            volumen.setValue(deciBelios);;
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException |LineUnavailableException e) {
+            e.printStackTrace();
+        }
     }
 
 }
