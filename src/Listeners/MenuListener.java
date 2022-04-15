@@ -24,10 +24,15 @@ public class MenuListener implements MouseListener {
         Point click = e.getPoint();
         if(click.getX()>(Juego.ANCHOFINAL/2)-100 && click.getX()<(Juego.ANCHOFINAL/2)+100){
             if(click.getY() >Juego.ALTOFINAL*3/8 && click.getY() < (Juego.ALTOFINAL*3/8)+Juego.ALTOFINAL/8){
-                j.cambiaModo();
+                j.cambiaModo(Juego.STATE.JUEGO);
             }
             if(click.getY() > Juego.ALTOFINAL*5/8 && click.getY() < (Juego.ALTOFINAL*5/8)+Juego.ALTOFINAL/8){
                 System.exit(1);
+            }
+        }
+        if(click.getX() < 32){
+            if(click.getY()> Juego.ALTOFINAL-32){
+                j.cambiaModo(Juego.STATE.OPCIONES);
             }
         }
         

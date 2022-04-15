@@ -18,17 +18,13 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 import java.awt.Graphics2D;
 
 import Listeners.MenuListener;
 import Listeners.MovementListener;
+import Listeners.OpcionesListener;
+import MusicPlayer.MusicPlayer;
 import Snake.Comida;
 import Snake.Nodo;
 import Snake.Snake;
@@ -64,6 +60,10 @@ public class Juego extends Canvas implements Runnable {
     //LISTENERS
     MovementListener listenerJuego;
     MenuListener listenerMenu;
+    OpcionesListener listenerOpciones;
+
+    //MUSIC PLAYER
+    MusicPlayer player;
 
     //VARIABLE JUGADOR
     Snake s;
@@ -72,12 +72,12 @@ public class Juego extends Canvas implements Runnable {
     Comida c;
 
     //SCORE
-    private int scoreActual = 0;
-    private int bestScore = 0;
+    public static int scoreActual = 0;
+    public static int bestScore = 0;
 
     //ESTADO DEL JUEGO
     public enum STATE{
-        MENU,JUEGO
+        MENU,JUEGO,OPCIONES
     }
 
     private STATE gameState;
@@ -90,20 +90,42 @@ public class Juego extends Canvas implements Runnable {
         gameState = e;
     }
 
-    public void cambiaModo(){
-        if(gameState == STATE.JUEGO){
+    public void cambiaModo(STATE newState){
+
+        if(newState==STATE.MENU){
             gameState = STATE.MENU;
-            this.addMouseListener(listenerMenu);;
-            this.removeKeyListener(listenerJuego);
-        }
-        else{
             
+            if(getKeyListeners().length != 0){
+                this.removeKeyListener(listenerJuego);
+            }
+            if(getMouseListeners().length != 0){
+                this.removeMouseListener(listenerOpciones);
+            }
+            this.addMouseListener(listenerMenu);
+        }
+        else if(newState == STATE.JUEGO){
+
+            if(getKeyListeners().length != 0){
+                this.removeKeyListener(listenerJuego);
+            }
+            if(getMouseListeners().length != 0){
+                this.removeMouseListener(listenerMenu);
+            }
             s = new Snake();
             c = new Comida((int) (Math.random()*(ANCHOFINAL-100))+100,((int) (Math.random()*(ALTOFINAL-100)))+100);
             listenerJuego = new MovementListener(s);
             this.addKeyListener(listenerJuego);
-            this.removeMouseListener(listenerMenu);
             gameState = STATE.JUEGO;
+        }
+        else{
+            if(getKeyListeners().length != 0){
+                this.removeKeyListener(listenerJuego);
+            }
+            if(getMouseListeners().length != 0){
+                this.removeMouseListener(listenerMenu);
+            }
+            this.addMouseListener(listenerOpciones);
+            gameState = STATE.OPCIONES;
         }
     }
     
@@ -180,6 +202,9 @@ public class Juego extends Canvas implements Runnable {
         parar();
     }
 
+    /**
+     * Metodo ejecutado cada vez que se quiere cambiar la logica del juego
+     */
     private void tick() {
         if(gameState != STATE.JUEGO){
             return;
@@ -192,7 +217,7 @@ public class Juego extends Canvas implements Runnable {
                 bestScore = scoreActual;
             }
             scoreActual = 0;
-            cambiaModo();
+            cambiaModo(STATE.MENU);
         }
         Nodo headNode = s.getListaNodos().get(0);
         if(c.compareTo(headNode)==0){
@@ -224,31 +249,15 @@ public class Juego extends Canvas implements Runnable {
             drawer.setColor(Color.white);
             drawer.drawString("Score: " + scoreActual, (ANCHOFINAL-150)/2, ALTOFINAL/8);
         }
+        else if(gameState==STATE.MENU){
+            Menu.dibujaMenu(drawer);
+        }
         else{
-            dibujaMenu(drawer);
+            Opciones.dibujaOpciones(drawer,player);
         }
         //TERMINA EL RENDER
         g.dispose();
         bs.show();
-    }
-    /**
-     * Renderizado del menu
-     * @param drawer
-     */
-    public void dibujaMenu(Graphics2D drawer){
-        drawer.setColor(Color.orange);
-        int anchomid = (ANCHOFINAL-200)/2;
-        drawer.setFont(new Font("Serif",Font.BOLD,40));
-        drawer.drawString("NYANSNAKE", anchomid-27, (ALTOFINAL/8)+50);
-        drawer.setColor(Color.green);
-        drawer.setFont(new Font("Serif",Font.BOLD,24));
-        drawer.drawRect(anchomid, ALTOFINAL*3/8, 200, ALTOFINAL/8);
-        drawer.drawString("JUGAR", anchomid+55, (ALTOFINAL*3/8)+46);
-        drawer.setColor(new Color(221,160,221));
-        drawer.drawRect(anchomid, ALTOFINAL*5/8, 200, ALTOFINAL/8);
-        drawer.drawString("SALIR", anchomid+60, (ALTOFINAL*5/8)+46);
-        drawer.setColor(Color.white);
-        drawer.drawString("Best Score: " + bestScore, anchomid+30, ALTOFINAL*7/8);
     }
 
     /**
@@ -286,9 +295,12 @@ public class Juego extends Canvas implements Runnable {
      * Constructor del canvas, donde toda la lógica del juego funciona
      */
     public Juego() {
+        //INICIALIZADO DE VENTANA
         this.setPreferredSize(new Dimension(ANCHO * ESCALADO, ALTO * ESCALADO));
         this.setMaximumSize(new Dimension(ANCHO * ESCALADO, ALTO * ESCALADO));
         this.setMinimumSize(new Dimension(ANCHO * ESCALADO, ALTO * ESCALADO));
+
+        //INICIALIZADO DE ASSETS
         try{
             fondo = ImageIO.read(new File("src/Graficos/Assets/Background.png"));
             headUp = ImageIO.read(new File("src/Graficos/Assets/NyanHeadUp.png"));
@@ -301,23 +313,18 @@ public class Juego extends Canvas implements Runnable {
         } catch (IOException ex) {
             Logger.getLogger(Juego.class.getName()).log(Level.SEVERE, null, ex);
         }
+
+        //INICIALIZADO DE PLAYER SONIDO
+        player = new MusicPlayer();
+
+        //INICIALIZADO DE LISTENER Y STATE
         gameState = STATE.MENU;
         listenerMenu = new MenuListener(this);
+        listenerOpciones = new OpcionesListener(player, this);
         addMouseListener(listenerMenu);
-        //PLAYER SONIDO
-        try {
-            AudioInputStream au = AudioSystem.getAudioInputStream(new File("src/Graficos/MusicaEspacio.wav").getAbsoluteFile());
-            Clip clip = AudioSystem.getClip();
-            clip.open(au);
-            clip.loop(Clip.LOOP_CONTINUOUSLY);
-            FloatControl volumen = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            float gain = 0.05f;
-            float deciBelios = (float) (Math.log(gain)/Math.log(10.0)*20);
-            volumen.setValue(deciBelios);;
-            clip.start();
-        } catch (UnsupportedAudioFileException | IOException |LineUnavailableException e) {
-            e.printStackTrace();
-        }
+
+        
+       
     }
 
 }
